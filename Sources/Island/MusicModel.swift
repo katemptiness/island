@@ -21,6 +21,12 @@ final class MusicModel: ObservableObject {
     private var active = false
     private var artworkKey: String?
 
+    /// Optimistic play/pause target awaiting confirmation from Music, with a
+    /// grace deadline. While set, snapshots that still report the old state are
+    /// ignored so the icon doesn't flip back before the command takes effect.
+    private var expectedPlaying: Bool?
+    private var expectedUntil: Date?
+
     init() {
         observe()
     }
@@ -34,9 +40,24 @@ final class MusicModel: ObservableObject {
     func refresh() {
         controller.snapshot { [weak self] snap in
             guard let self else { return }
-            self.snapshot = snap
-            self.updateArtwork(for: snap)
+            self.apply(snap)
         }
+    }
+
+    /// Apply a fresh snapshot, unless it contradicts an in-flight optimistic
+    /// play/pause within the grace window (see `expectedPlaying`) — that would be
+    /// Music still reporting the old state before the command lands.
+    private func apply(_ snap: MusicSnapshot) {
+        if let expected = expectedPlaying, let until = expectedUntil {
+            let confirmed: Bool
+            if case .playing(let info) = snap { confirmed = info.isPlaying == expected }
+            else { confirmed = false }
+            if !confirmed, Date() < until { return } // stale mid-command; keep optimistic
+            expectedPlaying = nil
+            expectedUntil = nil
+        }
+        snapshot = snap
+        updateArtwork(for: snap)
     }
 
     /// Fetch artwork only when the track actually changes; clear it otherwise.
@@ -68,7 +89,28 @@ final class MusicModel: ObservableObject {
         }
     }
 
-    func playPause() { send("playpause") }
+    func playPause() {
+        // Flip the icon/state immediately. The AppleScript round trip plus our
+        // follow-up refresh can take up to ~1s, which makes the transport button
+        // feel broken; `playerInfo`/refresh then confirms (or corrects) this.
+        // We also re-base the progress so the bar freezes/resumes in step.
+        if case .playing(let info) = snapshot {
+            let now = Date()
+            let elapsed = info.isPlaying ? max(0, now.timeIntervalSince(info.capturedAt)) : 0
+            let target = !info.isPlaying
+            snapshot = .playing(MusicNowPlaying(
+                title: info.title, artist: info.artist, album: info.album,
+                isPlaying: target,
+                position: min(info.position + elapsed, info.duration),
+                duration: info.duration,
+                capturedAt: now))
+            // Hold this target until Music confirms it, so a stale refresh can't
+            // bounce the icon back mid-command.
+            expectedPlaying = target
+            expectedUntil = now.addingTimeInterval(2.0)
+        }
+        send("playpause")
+    }
     func next() { send("next track") }
     func previous() { send("previous track") }
 
