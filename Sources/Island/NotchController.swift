@@ -19,12 +19,12 @@ final class NotchController {
 
     func show() {
         guard let geo = NotchGeometry.current() else {
-            elog("не удалось определить экран — island не показан")
+            elog("could not find a screen — island not shown")
             return
         }
         geometry = geo
 
-        elog("экран '\(geo.screen.localizedName)'")
+        elog("screen '\(geo.screen.localizedName)'")
         elog("notchRect=\(geo.notchRect)")
         elog("collapsed=\(geo.collapsedFrame)")
         elog("expanded=\(geo.expandedFrame)")
@@ -33,7 +33,7 @@ final class NotchController {
         let panel = NotchPanel(contentRect: geo.collapsedFrame)
 
         let container = NSView()
-        let host = NSHostingView(rootView: AnyView(IslandView(isExpanded: false)))
+        let host = NSHostingView(rootView: AnyView(IslandView(isExpanded: false, topInset: geo.notchRect.height)))
         host.autoresizingMask = [.width, .height]
         container.addSubview(host)
         panel.contentView = container
@@ -97,7 +97,8 @@ final class NotchController {
     // MARK: - Private
 
     private func render() {
-        hosting?.rootView = AnyView(IslandView(isExpanded: isExpanded))
+        let topInset = geometry?.notchRect.height ?? 32
+        hosting?.rootView = AnyView(IslandView(isExpanded: isExpanded, topInset: topInset))
     }
 
     private func animate(_ panel: NotchPanel, to frame: CGRect,

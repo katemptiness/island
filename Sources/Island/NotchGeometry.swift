@@ -39,7 +39,7 @@ struct NotchGeometry {
         )
 
         let collapsedSize = CGSize(width: notchWidth, height: notchHeight)
-        let expandedSize = CGSize(width: max(notchWidth + 90, 380), height: 180)
+        let expandedSize = CGSize(width: 360, height: 320)
 
         return NotchGeometry(
             screen: screen,

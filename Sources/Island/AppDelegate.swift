@@ -35,13 +35,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let menu = NSMenu()
 
-        let title = NSMenuItem(title: "Island — каркас v0.1", action: nil, keyEquivalent: "")
+        let title = NSMenuItem(title: "Island v0.1", action: nil, keyEquivalent: "")
         title.isEnabled = false
         menu.addItem(title)
 
         menu.addItem(.separator())
 
-        let quit = NSMenuItem(title: "Выйти", action: #selector(quit), keyEquivalent: "q")
+        let quit = NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q")
         quit.target = self
         menu.addItem(quit)
 

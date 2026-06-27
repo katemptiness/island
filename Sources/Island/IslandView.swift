@@ -25,26 +25,22 @@ struct BottomRoundedRectangle: Shape {
     }
 }
 
-/// Placeholder content for the skeleton. Real features will live here later.
+/// The island's content. Collapsed: just the black notch shape. Expanded: the
+/// feature area below the notch. `topInset` keeps content clear of the physical
+/// notch strip at the very top.
 struct IslandView: View {
     var isExpanded: Bool
+    var topInset: CGFloat
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             BottomRoundedRectangle(radius: isExpanded ? 22 : 10)
                 .fill(Color.black)
 
             if isExpanded {
-                VStack(spacing: 6) {
-                    Text("🏝️ Island")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
-                    Text("Каркас работает")
-                        .font(.system(size: 11))
-                        .foregroundStyle(.white.opacity(0.6))
-                }
-                .padding()
-                .transition(.opacity)
+                CalendarView()
+                    .padding(.top, topInset)
+                    .transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
