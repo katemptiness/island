@@ -10,13 +10,11 @@ struct CalendarView: View {
     private let displayLocale = Locale(identifier: "en_US")
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Theme.Spacing.tight) {
             header
             weekdayHeader
             grid
         }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 14)
     }
 
     // MARK: - Header
@@ -27,8 +25,8 @@ struct CalendarView: View {
             Spacer()
             // Tap the title to jump back to the current month.
             Text(monthTitle)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.white)
+                .font(Theme.Font.heading)
+                .foregroundStyle(Theme.Text.primary)
                 .contentShape(Rectangle())
                 .onTapGesture { withAnimation { displayedMonth = Date() } }
             Spacer()
@@ -39,8 +37,8 @@ struct CalendarView: View {
     private func navButton(_ symbol: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.8))
+                .font(Theme.Font.subheadEmphasized)
+                .foregroundStyle(Theme.Text.secondary)
                 .frame(width: 26, height: 26)
                 .contentShape(Rectangle())
         }
@@ -53,8 +51,8 @@ struct CalendarView: View {
         HStack(spacing: 0) {
             ForEach(Array(orderedWeekdaySymbols.enumerated()), id: \.offset) { _, symbol in
                 Text(symbol)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.45))
+                    .font(Theme.Font.captionEmphasized)
+                    .foregroundStyle(Theme.Text.faint)
                     .frame(maxWidth: .infinity)
             }
         }
@@ -85,7 +83,7 @@ struct CalendarView: View {
                 .font(.system(size: 12, weight: isToday ? .bold : .regular))
                 .foregroundStyle(
                     isToday ? Color.black
-                    : (isWeekend ? Color.red.opacity(0.85) : Color.white)
+                    : (isWeekend ? Theme.weekend : Theme.Text.primary)
                 )
                 .frame(width: 26, height: 26)
                 .background(Circle().fill(isToday ? Color.white : Color.clear))

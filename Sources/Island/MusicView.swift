@@ -5,7 +5,7 @@ struct MusicView: View {
     @ObservedObject var model: MusicModel
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Theme.Spacing.section) {
             switch model.snapshot {
             case .notRunning:
                 placeholder(icon: "music.note", text: "Music isn't running")
@@ -19,55 +19,54 @@ struct MusicView: View {
                 controls(info)
             }
         }
-        .padding(.horizontal, 16)
         .onAppear { model.activate() }
     }
 
     // MARK: - States
 
     private func placeholder(icon: String, text: String) -> some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Theme.Spacing.tight) {
             Image(systemName: icon)
                 .font(.system(size: 30))
-                .foregroundStyle(.white.opacity(0.5))
+                .foregroundStyle(Theme.Text.tertiary)
             Text(text)
-                .font(.system(size: 12))
-                .foregroundStyle(.white.opacity(0.5))
+                .font(Theme.Font.subhead)
+                .foregroundStyle(Theme.Text.tertiary)
         }
         .frame(maxWidth: .infinity, minHeight: 120)
     }
 
     private var permissionHint: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Theme.Spacing.tight) {
             Image(systemName: "lock.shield")
                 .font(.system(size: 26))
-                .foregroundStyle(.orange)
+                .foregroundStyle(Theme.warn)
             Text("Allow Island to control Music")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.white)
+                .font(Theme.Font.subheadEmphasized)
+                .foregroundStyle(Theme.Text.primary)
             Text("System Settings → Privacy & Security → Automation")
-                .font(.system(size: 10))
-                .foregroundStyle(.white.opacity(0.5))
+                .font(Theme.Font.caption)
+                .foregroundStyle(Theme.Text.tertiary)
                 .multilineTextAlignment(.center)
             Button("Retry") { model.refresh() }
                 .buttonStyle(.plain)
-                .font(.system(size: 11))
-                .foregroundStyle(.blue)
+                .font(Theme.Font.footnote)
+                .foregroundStyle(Theme.accent)
         }
         .frame(maxWidth: .infinity, minHeight: 120)
     }
 
     private func nowPlaying(_ info: MusicNowPlaying) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Theme.Spacing.section) {
             artwork
             VStack(alignment: .leading, spacing: 3) {
                 Text(info.title.isEmpty ? "—" : info.title)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .font(Theme.Font.heading)
+                    .foregroundStyle(Theme.Text.primary)
                     .lineLimit(1)
                 Text(info.artist)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.white.opacity(0.6))
+                    .font(Theme.Font.footnote)
+                    .foregroundStyle(Theme.Text.secondary)
                     .lineLimit(1)
             }
             Spacer()
@@ -84,12 +83,12 @@ struct MusicView: View {
             } else {
                 Image(systemName: "music.note")
                     .font(.system(size: 24))
-                    .foregroundStyle(.white.opacity(0.85))
+                    .foregroundStyle(Theme.Text.secondary)
             }
         }
         .frame(width: 54, height: 54)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.white.opacity(0.12)))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.tile).fill(Theme.Fill.subtle))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.tile))
     }
 
     private func progress(_ info: MusicNowPlaying) -> some View {
@@ -102,8 +101,8 @@ struct MusicView: View {
             VStack(spacing: 3) {
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
-                        Capsule().fill(.white.opacity(0.15))
-                        Capsule().fill(.white.opacity(0.8))
+                        Capsule().fill(Theme.Fill.track)
+                        Capsule().fill(Theme.Fill.bar)
                             .frame(width: geo.size.width * fraction)
                     }
                 }
@@ -113,8 +112,8 @@ struct MusicView: View {
                     Spacer()
                     Text(timeString(info.duration))
                 }
-                .font(.system(size: 9))
-                .foregroundStyle(.white.opacity(0.5))
+                .font(Theme.Font.micro)
+                .foregroundStyle(Theme.Text.tertiary)
             }
         }
     }
@@ -138,7 +137,7 @@ struct MusicView: View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.system(size: size, weight: .medium))
-                .foregroundStyle(.white)
+                .foregroundStyle(Theme.Text.primary)
                 .frame(width: 42, height: 36)
                 .contentShape(Rectangle())
         }

@@ -53,10 +53,12 @@ struct IslandRootView: View {
                 .fill(Color.black)
 
             if model.isExpanded {
-                VStack(spacing: 10) {
+                VStack(spacing: Theme.Spacing.afterTabs) {
                     TabBar(selection: $model.selectedTab)
-                        .padding(.top, model.topInset + 6)
+                        .padding(.top, model.topInset + Theme.Spacing.belowNotch)
                     content
+                        .padding(.horizontal, Theme.Spacing.edge)
+                        .padding(.bottom, Theme.Spacing.edge)
                     Spacer(minLength: 0)
                 }
                 .frame(width: model.expandedSize.width, height: model.expandedSize.height, alignment: .top)
