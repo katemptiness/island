@@ -2,8 +2,12 @@ import AppKit
 import SwiftUI
 import Combine
 
-/// Owns the panel and the shared `IslandModel`, and animates between the
-/// collapsed and expanded states.
+/// Owns the panel and the shared `IslandModel`.
+///
+/// The panel is kept at the *expanded* size and transparent; opening/closing is a
+/// pure SwiftUI spring on the inner shape (see `IslandRootView`), not a window
+/// resize. While collapsed the panel ignores mouse events so clicks pass through
+/// to the menu bar / desktop; it grabs them again when expanded.
 ///
 /// Hover is detected by watching the *global* mouse position against two fixed
 /// zones — a small "open" zone on the notch and the large "stay-open" zone.
@@ -26,13 +30,13 @@ final class NotchController {
         }
         geometry = geo
         model.topInset = geo.notchRect.height
+        model.collapsedSize = geo.collapsedSize
+        model.expandedSize = geo.expandedSize
 
         elog("screen '\(geo.screen.localizedName)'")
-        elog("collapsed=\(geo.collapsedFrame)")
-        elog("expanded=\(geo.expandedFrame)")
-        elog("trigger=\(geo.hoverTriggerRect)")
+        elog("window=\(geo.windowFrame) expanded=\(geo.expandedFrame) trigger=\(geo.hoverTriggerRect)")
 
-        let panel = NotchPanel(contentRect: geo.collapsedFrame)
+        let panel = NotchPanel(contentRect: geo.windowFrame)
 
         let container = NSView()
         let host = NSHostingView(rootView: IslandRootView(model: model))
@@ -43,7 +47,8 @@ final class NotchController {
 
         self.panel = panel
 
-        panel.setFrame(geo.collapsedFrame, display: true)
+        panel.setFrame(geo.windowFrame, display: true)
+        panel.ignoresMouseEvents = true // collapsed: let clicks through
         panel.orderFrontRegardless()
 
         startMouseMonitoring()
@@ -99,30 +104,26 @@ final class NotchController {
 
     // MARK: - State transitions
 
+    private let openAnimation = Animation.spring(duration: 0.42, bounce: 0.3)
+
     func expand() {
-        guard let panel, let geo = geometry, !model.isExpanded else { return }
-        withAnimation(.easeOut(duration: 0.28)) { model.isExpanded = true }
-        animateFrame(panel, to: geo.expandedFrame)
+        guard !model.isExpanded else { return }
+        panel?.ignoresMouseEvents = false
+        withAnimation(openAnimation) { model.isExpanded = true }
     }
 
     func collapse() {
-        guard let panel, let geo = geometry, model.isExpanded else { return }
-        withAnimation(.easeIn(duration: 0.22)) { model.isExpanded = false }
-        animateFrame(panel, to: geo.collapsedFrame)
+        guard model.isExpanded else { return }
+        panel?.ignoresMouseEvents = true
+        withAnimation(openAnimation) { model.isExpanded = false }
     }
 
     func reposition() {
         guard let geo = NotchGeometry.current() else { return }
         geometry = geo
         model.topInset = geo.notchRect.height
-        panel?.setFrame(model.isExpanded ? geo.expandedFrame : geo.collapsedFrame, display: true)
-    }
-
-    private func animateFrame(_ panel: NotchPanel, to frame: CGRect) {
-        NSAnimationContext.runAnimationGroup { ctx in
-            ctx.duration = 0.28
-            ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            panel.animator().setFrame(frame, display: true)
-        }
+        model.collapsedSize = geo.collapsedSize
+        model.expandedSize = geo.expandedSize
+        panel?.setFrame(geo.windowFrame, display: true)
     }
 }

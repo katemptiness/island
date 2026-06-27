@@ -43,4 +43,9 @@ final class IslandModel: ObservableObject {
 
     /// Height of the physical notch strip; content is kept below it.
     var topInset: CGFloat = 32
+
+    /// Inner island dimensions for the two states. The window itself stays at the
+    /// expanded size; SwiftUI animates the black shape between these.
+    var collapsedSize = CGSize(width: 200, height: 32)
+    var expandedSize = CGSize(width: 380, height: 380)
 }

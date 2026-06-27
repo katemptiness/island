@@ -59,14 +59,27 @@ struct NotchGeometry {
         )
     }
 
-    /// Expanded frame: wider/taller, top-aligned to the screen edge, centered
-    /// horizontally on the notch so it grows symmetrically downward.
+    /// Expanded frame: the island's visible extent when open. Also the hover
+    /// "stay-open" zone.
     var expandedFrame: CGRect {
         CGRect(
             x: notchRect.midX - expandedSize.width / 2,
             y: screen.frame.maxY - expandedSize.height,
             width: expandedSize.width,
             height: expandedSize.height
+        )
+    }
+
+    /// The actual window frame — a bit larger than the island so the spring can
+    /// overshoot into transparent margins instead of being clipped.
+    var windowFrame: CGRect {
+        let marginX: CGFloat = 50
+        let marginBottom: CGFloat = 50
+        return CGRect(
+            x: notchRect.midX - (expandedSize.width / 2 + marginX),
+            y: screen.frame.maxY - (expandedSize.height + marginBottom),
+            width: expandedSize.width + marginX * 2,
+            height: expandedSize.height + marginBottom
         )
     }
 
