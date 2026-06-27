@@ -25,24 +25,36 @@ struct BottomRoundedRectangle: Shape {
     }
 }
 
-/// The island's content. Collapsed: just the black notch shape. Expanded: the
-/// feature area below the notch. `topInset` keeps content clear of the physical
-/// notch strip at the very top.
-struct IslandView: View {
-    var isExpanded: Bool
-    var topInset: CGFloat
+/// The island's root view. Collapsed: just the black notch shape. Expanded: the
+/// tab bar plus the active feature, kept below the physical notch strip.
+struct IslandRootView: View {
+    @ObservedObject var model: IslandModel
 
     var body: some View {
         ZStack(alignment: .top) {
-            BottomRoundedRectangle(radius: isExpanded ? 22 : 10)
+            BottomRoundedRectangle(radius: model.isExpanded ? 22 : 10)
                 .fill(Color.black)
 
-            if isExpanded {
-                CalendarView()
-                    .padding(.top, topInset)
-                    .transition(.opacity)
+            if model.isExpanded {
+                VStack(spacing: 10) {
+                    TabBar(selection: $model.selectedTab)
+                        .padding(.top, model.topInset + 6)
+                    content
+                    Spacer(minLength: 0)
+                }
+                .transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch model.selectedTab {
+        case .calendar:
+            CalendarView()
+        case .weather:
+            WeatherView(model: model.weather, isPinned: $model.isPinned)
+        }
     }
 }
