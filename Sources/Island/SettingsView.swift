@@ -53,7 +53,7 @@ struct SettingsView: View {
             Text("Version \(AppInfo.version)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text("A Dynamic Island for the Mac notch — hover to open a small hub for your music, calendar, and weather.")
+            Text("A Dynamic Island for the Mac notch — hover to open a hub for your calendar, weather, and music, plus a drag-and-drop file shelf.")
                 .font(.callout)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)

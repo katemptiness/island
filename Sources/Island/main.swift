@@ -2,7 +2,7 @@ import AppKit
 
 /// App-wide constants.
 enum AppInfo {
-    static let version = "0.2"
+    static let version = "1.0"
 }
 
 // Entry point. We run as an "accessory" app: no Dock icon, lives in the
