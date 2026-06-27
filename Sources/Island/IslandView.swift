@@ -59,7 +59,7 @@ struct IslandRootView: View {
                         expandedHeight: model.currentExpandedHeight,
                         collapsedSize: model.collapsedSize,
                         expandedWidth: model.expandedSize.width)
-                .fill(Color.black)
+                .fill(tintGradient)
 
             if model.isExpanded {
                 VStack(spacing: Theme.Spacing.afterTabs) {
@@ -79,6 +79,26 @@ struct IslandRootView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    /// Black at the notch, easing into the tab's tint toward the island's bottom.
+    /// The shape fills the whole panel, so the stops are expressed as fractions
+    /// of the panel height and the color is reached exactly at the island's edge.
+    /// With no tint (calendar / no data) it's black throughout.
+    private var tintGradient: LinearGradient {
+        let island = max(model.currentExpandedHeight, 1)
+        let panel = max(model.windowHeight, island)
+        let bottom = min(island / panel, 1)
+        let hold = bottom * 0.30 // keep the top third (notch + tabs) solid black
+        let tint = model.currentTint ?? .black
+        return LinearGradient(
+            stops: [
+                .init(color: .black, location: 0),
+                .init(color: .black, location: hold),
+                .init(color: tint, location: bottom)
+            ],
+            startPoint: .top, endPoint: .bottom
+        )
     }
 
     @ViewBuilder

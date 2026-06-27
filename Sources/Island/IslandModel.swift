@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The features the island can show, one per tab.
 enum IslandTab: String, CaseIterable, Identifiable {
@@ -52,6 +53,17 @@ final class IslandModel: ObservableObject {
     let weather = WeatherModel()
     let music = MusicModel()
 
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        // weather/music are separate observable objects; surface their changes
+        // here so the island's tint (derived from them) refreshes too.
+        for child in [weather.objectWillChange, music.objectWillChange] {
+            child.sink { [weak self] _ in self?.objectWillChange.send() }
+                .store(in: &cancellables)
+        }
+    }
+
     /// Height of the physical notch strip; content is kept below it.
     var topInset: CGFloat = 32
 
@@ -61,7 +73,21 @@ final class IslandModel: ObservableObject {
     var collapsedSize = CGSize(width: 200, height: 32)
     var expandedSize = CGSize(width: 380, height: 380)
 
+    /// Full panel height (island + transparent margins). Used to map the tint
+    /// gradient — which fills the whole panel — onto the island's own height.
+    var windowHeight: CGFloat = 430
+
     /// The open height for whichever tab is selected. Driving the shape from
     /// this makes the island resize (with a spring) as you switch tabs.
     var currentExpandedHeight: CGFloat { selectedTab.expandedHeight }
+
+    /// Bottom color of the island's gradient for the current tab; nil keeps it
+    /// pure black (calendar, or when no data/artwork is available).
+    var currentTint: Color? {
+        switch selectedTab {
+        case .calendar: return nil
+        case .weather: return weather.tint
+        case .music: return music.tint
+        }
+    }
 }

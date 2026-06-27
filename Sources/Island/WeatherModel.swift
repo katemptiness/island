@@ -10,6 +10,14 @@ final class WeatherModel: ObservableObject {
     @Published var query = ""
     @Published var results: [GeoResult] = []
 
+    /// Background tint derived from the current conditions (nil until loaded).
+    var tint: Color? {
+        if case .loaded(let data) = phase {
+            return IslandTint.weather(code: data.code, isDay: data.isDay)
+        }
+        return nil
+    }
+
     private let service = WeatherService()
     private let cityKey = "island.weather.city"
     private var lastFetch: Date?
@@ -37,7 +45,7 @@ final class WeatherModel: ObservableObject {
         do {
             let data = try await service.fetchWeather(latitude: city.latitude, longitude: city.longitude)
             await MainActor.run {
-                self.phase = .loaded(data)
+                withAnimation(.easeInOut(duration: 0.5)) { self.phase = .loaded(data) }
                 self.lastFetch = Date()
             }
         } catch {

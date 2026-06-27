@@ -7,6 +7,8 @@ import SwiftUI
 final class MusicModel: ObservableObject {
     @Published var snapshot: MusicSnapshot = .notRunning
     @Published var artwork: NSImage?
+    /// Background tint derived from the current artwork (nil when none).
+    @Published var tint: Color?
 
     private let controller = MusicController()
     private var active = false
@@ -35,6 +37,7 @@ final class MusicModel: ObservableObject {
         guard case .playing(let info) = snap else {
             artworkKey = nil
             artwork = nil
+            withAnimation(.easeInOut(duration: 0.4)) { tint = nil }
             return
         }
         let key = info.title + "|" + info.artist
@@ -43,6 +46,18 @@ final class MusicModel: ObservableObject {
         controller.artwork { [weak self] image in
             guard let self, self.artworkKey == key else { return } // track still current
             self.artwork = image
+            guard let image else {
+                withAnimation(.easeInOut(duration: 0.4)) { self.tint = nil }
+                return
+            }
+            // Derive the tint off the main thread; cheap, but keep the UI smooth.
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                let tint = IslandTint.artwork(image)
+                DispatchQueue.main.async {
+                    guard let self, self.artworkKey == key else { return }
+                    withAnimation(.easeInOut(duration: 0.5)) { self.tint = tint }
+                }
+            }
         }
     }
 

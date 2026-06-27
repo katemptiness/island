@@ -32,6 +32,7 @@ final class NotchController {
         model.topInset = geo.notchRect.height
         model.collapsedSize = geo.collapsedSize
         model.expandedSize = geo.expandedSize
+        model.windowHeight = geo.windowFrame.height
 
         elog("screen '\(geo.screen.localizedName)'")
         elog("window=\(geo.windowFrame) trigger=\(geo.hoverTriggerRect)")
@@ -124,6 +125,7 @@ final class NotchController {
         model.topInset = geo.notchRect.height
         model.collapsedSize = geo.collapsedSize
         model.expandedSize = geo.expandedSize
+        model.windowHeight = geo.windowFrame.height
         panel?.setFrame(geo.windowFrame, display: true)
     }
 }
