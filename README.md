@@ -6,13 +6,14 @@ Built for a MacBook Air (M4, macOS Tahoe). Native Swift, no Xcode required.
 
 ## Status
 
-Early WIP. Currently: the **skeleton** — a transparent panel that sits on the
-notch, blends in at rest, and expands on hover.
+Early WIP, but already useful. A transparent panel sits on the notch, blends in
+at rest, and expands on hover into a tabbed UI.
 
-### Planned features
-- 🎵 Apple Music playback control
-- 📅 Calendar + weather peek
-- 🗂️ Drag & drop shelf (clipboard for files)
+### Features
+- ✅ 📅 **Calendar** — month grid, today highlighted
+- ✅ 🌤️ **Weather** — current conditions + 5-day forecast (Open-Meteo), pick your city
+- ✅ 🎵 **Music** — Apple Music now-playing + transport controls
+- ⏳ 🗂️ **Drag & drop shelf** — a clipboard for files (planned)
 
 ## Build & run
 
@@ -28,4 +29,4 @@ A small icon appears in the menu bar; use it to quit.
 
 ## License
 
-MIT (to be added).
+MIT — see [LICENSE](LICENSE).
