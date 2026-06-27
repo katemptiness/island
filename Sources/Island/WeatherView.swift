@@ -7,6 +7,7 @@ struct WeatherView: View {
     @ObservedObject var model: WeatherModel
     @Binding var isPinned: Bool
     @FocusState private var fieldFocused: Bool
+    @State private var spin = false
 
     private var editing: Bool { model.isEditing || model.city == nil }
 
@@ -101,15 +102,34 @@ struct WeatherView: View {
                     }
                 }
                 Spacer()
-                Button { model.beginEditing() } label: {
-                    Image(systemName: "pencil")
-                        .font(Theme.Font.footnote)
-                        .foregroundStyle(Theme.Text.tertiary)
+                HStack(spacing: Theme.Spacing.section) {
+                    Button { Task { await model.refresh(force: true) } } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(Theme.Font.footnote)
+                            .foregroundStyle(Theme.Text.tertiary)
+                            .rotationEffect(.degrees(spin ? 360 : 0))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(model.isRefreshing)
+
+                    Button { model.beginEditing() } label: {
+                        Image(systemName: "pencil")
+                            .font(Theme.Font.footnote)
+                            .foregroundStyle(Theme.Text.tertiary)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
 
             phaseContent
+        }
+        // Spin the refresh icon while a fetch is in flight, then settle.
+        .onChange(of: model.isRefreshing) { _, refreshing in
+            if refreshing {
+                withAnimation(.linear(duration: 0.8).repeatForever(autoreverses: false)) { spin = true }
+            } else {
+                withAnimation(.linear(duration: 0.2)) { spin = false }
+            }
         }
     }
 

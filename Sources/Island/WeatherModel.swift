@@ -9,6 +9,8 @@ final class WeatherModel: ObservableObject {
     @Published var isEditing = false
     @Published var query = ""
     @Published var results: [GeoResult] = []
+    /// True while a fetch is in flight; drives the manual-refresh spinner.
+    @Published var isRefreshing = false
 
     /// Background tint derived from the current conditions (nil until loaded).
     var tint: Color? {
@@ -41,15 +43,29 @@ final class WeatherModel: ObservableObject {
            case .loaded = phase {
             return // still fresh
         }
-        await MainActor.run { self.phase = .loading }
+        // Keep existing data visible while refreshing; only show the full-block
+        // spinner when there's nothing to display yet.
+        let hadData = await MainActor.run { () -> Bool in
+            let loaded: Bool
+            if case .loaded = self.phase { loaded = true } else { loaded = false }
+            self.isRefreshing = true
+            if !loaded { self.phase = .loading }
+            return loaded
+        }
         do {
             let data = try await service.fetchWeather(latitude: city.latitude, longitude: city.longitude)
             await MainActor.run {
                 withAnimation(.easeInOut(duration: 0.5)) { self.phase = .loaded(data) }
                 self.lastFetch = Date()
+                self.isRefreshing = false
             }
         } catch {
-            await MainActor.run { self.phase = .failed("Couldn't load weather") }
+            await MainActor.run {
+                // Don't discard good data on a failed refresh; only surface the
+                // error when we have nothing else to show.
+                if !hadData { self.phase = .failed("Couldn't load weather") }
+                self.isRefreshing = false
+            }
         }
     }
 
