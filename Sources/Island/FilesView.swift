@@ -106,7 +106,13 @@ struct FilesView: View {
         .background(RoundedRectangle(cornerRadius: Theme.Radius.field).fill(Theme.Fill.subtle))
         .contentShape(Rectangle())
         // Drag the actual file out to Finder, Mail, etc. The shelf keeps it.
-        .onDrag { dragProvider(for: item) }
+        // Collapse the island as the drag starts so its big transparent window
+        // stops intercepting the drop; deferred so the drag fully begins first
+        // (collapsing mid-initiation can cancel it).
+        .onDrag {
+            DispatchQueue.main.async { model.onDragOut?() }
+            return dragProvider(for: item)
+        }
     }
 
     private func dragProvider(for item: ShelfItem) -> NSItemProvider {

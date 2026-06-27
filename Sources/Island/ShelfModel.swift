@@ -20,6 +20,11 @@ struct ShelfItem: Identifiable {
 final class ShelfModel: ObservableObject {
     @Published private(set) var items: [ShelfItem] = []
 
+    /// Called when the user starts dragging an item off the shelf, so the island
+    /// can collapse and stop its large transparent window from intercepting the
+    /// drop somewhere it shouldn't land.
+    var onDragOut: (() -> Void)?
+
     /// Add files, skipping any already on the shelf (compared by resolved path).
     func add(_ urls: [URL]) {
         let present = Set(items.map { $0.url.standardizedFileURL })

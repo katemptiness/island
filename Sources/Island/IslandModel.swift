@@ -97,7 +97,9 @@ final class IslandModel: ObservableObject {
     private func refreshPin(tab: IslandTab? = nil, editing: Bool? = nil) {
         let t = tab ?? selectedTab
         let e = editing ?? weather.isEditing
-        isPinned = (t == .files) || (t == .weather && e)
+        // Only city editing pins now; the Files tab no longer needs it because a
+        // file dragged to the notch opens the island on its own (NotchDropCatcher).
+        isPinned = (t == .weather && e)
     }
 
     /// Height of the physical notch strip; content is kept below it.

@@ -15,6 +15,7 @@ import Combine
 /// can't oscillate. While `model.isPinned` is set, hover is ignored entirely.
 final class NotchController {
     private var panel: NotchPanel?
+    private var dropCatcher: NotchDropCatcher?
     private var geometry: NotchGeometry?
     private let model = IslandModel()
 
@@ -52,8 +53,27 @@ final class NotchController {
         panel.ignoresMouseEvents = true // collapsed: let clicks through
         panel.orderFrontRegardless()
 
+        // Catch files dragged to the notch and open the shelf for them. Kept to
+        // the notch gap so it never swallows menu-bar clicks; ordered after the
+        // panel so it's in front for that small strip.
+        let catcher = NotchDropCatcher(frame: geo.hoverTriggerRect)
+        catcher.onEnter = { [weak self] in self?.openForDrop() }
+        catcher.onDrop = { [weak self] urls in self?.model.shelf.add(urls) }
+        catcher.show()
+        dropCatcher = catcher
+
+        // Collapse out of the way when an item is dragged off the shelf.
+        model.shelf.onDragOut = { [weak self] in self?.collapse() }
+
         startMouseMonitoring()
         observePin()
+    }
+
+    /// A file is being dragged to the notch: jump to the Files tab and open, so
+    /// the island is a ready drop target regardless of which tab was last shown.
+    private func openForDrop() {
+        model.selectedTab = .files
+        expand()
     }
 
     /// React to the pinned flag: when pinned (e.g. typing a city) make the panel
@@ -130,5 +150,6 @@ final class NotchController {
         model.expandedSize = geo.expandedSize
         model.windowHeight = geo.windowFrame.height
         panel?.setFrame(geo.windowFrame, display: true)
+        dropCatcher?.setFrame(geo.hoverTriggerRect)
     }
 }
