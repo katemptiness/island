@@ -6,9 +6,11 @@ import SwiftUI
 /// `com.apple.Music.playerInfo` distributed notification — no polling.
 final class MusicModel: ObservableObject {
     @Published var snapshot: MusicSnapshot = .notRunning
+    @Published var artwork: NSImage?
 
     private let controller = MusicController()
     private var active = false
+    private var artworkKey: String?
 
     init() {
         observe()
@@ -22,7 +24,25 @@ final class MusicModel: ObservableObject {
 
     func refresh() {
         controller.snapshot { [weak self] snap in
-            self?.snapshot = snap
+            guard let self else { return }
+            self.snapshot = snap
+            self.updateArtwork(for: snap)
+        }
+    }
+
+    /// Fetch artwork only when the track actually changes; clear it otherwise.
+    private func updateArtwork(for snap: MusicSnapshot) {
+        guard case .playing(let info) = snap else {
+            artworkKey = nil
+            artwork = nil
+            return
+        }
+        let key = info.title + "|" + info.artist
+        guard key != artworkKey else { return }
+        artworkKey = key
+        controller.artwork { [weak self] image in
+            guard let self, self.artworkKey == key else { return } // track still current
+            self.artwork = image
         }
     }
 

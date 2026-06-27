@@ -5,6 +5,9 @@ struct MusicNowPlaying {
     let artist: String
     let album: String
     let isPlaying: Bool
+    let position: Double      // seconds into the track at capture time
+    let duration: Double      // track length in seconds
+    let capturedAt: Date      // when position was sampled (for local extrapolation)
 }
 
 enum MusicSnapshot {
@@ -44,6 +47,33 @@ final class MusicController {
         }
     }
 
+    /// Current track artwork, if any. Fiddly (raw image bytes over Apple Events),
+    /// so it fails soft to nil.
+    func artwork(_ completion: @escaping (NSImage?) -> Void) {
+        guard isRunning else { completion(nil); return }
+        queue.async {
+            let image = self.readArtwork()
+            DispatchQueue.main.async { completion(image) }
+        }
+    }
+
+    private func readArtwork() -> NSImage? {
+        let source = """
+        tell application "Music"
+            if player state is stopped then return missing value
+            try
+                return data of artwork 1 of current track
+            on error
+                return missing value
+            end try
+        end tell
+        """
+        var error: NSDictionary?
+        guard let result = NSAppleScript(source: source)?.executeAndReturnError(&error),
+              error == nil else { return nil }
+        return NSImage(data: result.data) // empty data (missing value) → nil
+    }
+
     // MARK: - Private
 
     private func readSnapshot() -> MusicSnapshot {
@@ -54,12 +84,16 @@ final class MusicController {
             set t to ""
             set a to ""
             set al to ""
+            set pos to 0
+            set dur to 0
             try
                 set t to name of current track
                 set a to artist of current track
                 set al to album of current track
+                set dur to (duration of current track) as integer
+                set pos to (player position) as integer
             end try
-            return ps & "\\n" & t & "\\n" & a & "\\n" & al
+            return ps & "\\n" & t & "\\n" & a & "\\n" & al & "\\n" & (pos as text) & "\\n" & (dur as text)
         end tell
         """
         var error: NSDictionary?
@@ -77,11 +111,15 @@ final class MusicController {
 
         let parts = text.components(separatedBy: "\n")
         let state = parts.first ?? ""
+        func part(_ i: Int) -> String { parts.count > i ? parts[i] : "" }
         return .playing(MusicNowPlaying(
-            title: parts.count > 1 ? parts[1] : "",
-            artist: parts.count > 2 ? parts[2] : "",
-            album: parts.count > 3 ? parts[3] : "",
-            isPlaying: state == "playing"
+            title: part(1),
+            artist: part(2),
+            album: part(3),
+            isPlaying: state == "playing",
+            position: Double(part(4)) ?? 0,
+            duration: Double(part(5)) ?? 0,
+            capturedAt: Date()
         ))
     }
 }
