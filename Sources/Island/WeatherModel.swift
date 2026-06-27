@@ -39,7 +39,8 @@ final class WeatherModel: ObservableObject {
 
     func refresh(force: Bool = false) async {
         guard let city else { return }
-        if !force, let last = lastFetch, Date().timeIntervalSince(last) < 600,
+        let maxAge = TimeInterval(AppSettings.shared.weatherRefreshMinutes * 60)
+        if !force, let last = lastFetch, Date().timeIntervalSince(last) < maxAge,
            case .loaded = phase {
             return // still fresh
         }

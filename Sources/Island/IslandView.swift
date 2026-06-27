@@ -52,13 +52,15 @@ struct IslandShape: Shape {
 /// in when expanded.
 struct IslandRootView: View {
     @ObservedObject var model: IslandModel
+    @ObservedObject private var settings = AppSettings.shared
 
     var body: some View {
         ZStack(alignment: .top) {
             // Ambient "now playing" glow around the notch, only while collapsed
             // (when open, the music content already conveys it and a halo would
-            // distract).
-            if !model.isExpanded, model.music.isActivelyPlaying, let tint = model.music.tint {
+            // distract) and only if enabled in Settings.
+            if !model.isExpanded, settings.musicGlowEnabled,
+               model.music.isActivelyPlaying, let tint = model.music.tint {
                 MusicGlow(collapsedSize: model.collapsedSize,
                           expandedWidth: model.expandedSize.width,
                           color: tint)

@@ -3,6 +3,7 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var notch: NotchController?
     private var statusItem: NSStatusItem?
+    private let settingsWindow = SettingsWindowController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusItem()
@@ -35,9 +36,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let menu = NSMenu()
 
-        let title = NSMenuItem(title: "Island v0.1", action: nil, keyEquivalent: "")
+        let title = NSMenuItem(title: "Island v\(AppInfo.version)", action: nil, keyEquivalent: "")
         title.isEnabled = false
         menu.addItem(title)
+
+        menu.addItem(.separator())
+
+        let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        settings.target = self
+        menu.addItem(settings)
 
         menu.addItem(.separator())
 
@@ -47,6 +54,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         item.menu = menu
         statusItem = item
+    }
+
+    @objc private func openSettings() {
+        settingsWindow.show()
     }
 
     @objc private func quit() {

@@ -62,6 +62,19 @@ final class IslandModel: ObservableObject {
             child.sink { [weak self] _ in self?.objectWillChange.send() }
                 .store(in: &cancellables)
         }
+
+        // Keep the selection valid as tabs are shown/hidden in Settings: if the
+        // current tab gets hidden, fall back to the first visible one. (Fires
+        // immediately with the current set, so it also fixes the launch state.)
+        AppSettings.shared.$enabledTabs
+            .sink { [weak self] tabs in
+                guard let self else { return }
+                let visible = IslandTab.allCases.filter { tabs.contains($0) }
+                if !visible.contains(self.selectedTab), let first = visible.first {
+                    self.selectedTab = first
+                }
+            }
+            .store(in: &cancellables)
     }
 
     /// Height of the physical notch strip; content is kept below it.

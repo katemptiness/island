@@ -7,11 +7,12 @@ import SwiftUI
 /// the selection changes, echoing the island's own spring morph.
 struct TabBar: View {
     @Binding var selection: IslandTab
+    @ObservedObject private var settings = AppSettings.shared
     @Namespace private var highlight
 
     var body: some View {
         HStack(spacing: Theme.Spacing.element) {
-            ForEach(IslandTab.allCases) { tab in
+            ForEach(settings.visibleTabs) { tab in
                 tabButton(tab)
             }
         }
