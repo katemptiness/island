@@ -10,6 +10,13 @@ final class MusicModel: ObservableObject {
     /// Background tint derived from the current artwork (nil when none).
     @Published var tint: Color?
 
+    /// True only while a track is actually playing (not paused/stopped). Drives
+    /// the ambient now-playing glow around the notch.
+    var isActivelyPlaying: Bool {
+        if case .playing(let info) = snapshot { return info.isPlaying }
+        return false
+    }
+
     private let controller = MusicController()
     private var active = false
     private var artworkKey: String?

@@ -80,6 +80,16 @@ enum IslandTint {
         return muted(NSColor(srgbRed: CGFloat(r), green: CGFloat(g), blue: CGFloat(b), alpha: 1))
     }
 
+    /// A vivid, light-emitting version of a tint for the now-playing glow. The
+    /// muted gradient color is too dark to read as a glow, so we keep its hue but
+    /// push saturation and brightness up.
+    static func glow(from color: Color) -> Color {
+        guard let c = NSColor(color).usingColorSpace(.sRGB) else { return color }
+        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        c.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+        return Color(hue: Double(h), saturation: min(Double(s) + 0.2, 0.85), brightness: 0.86)
+    }
+
     // MARK: Helpers
 
     private static func hsb(_ hueDegrees: Double, _ saturation: Double, _ brightness: Double) -> Color {
