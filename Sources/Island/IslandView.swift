@@ -55,6 +55,8 @@ struct IslandRootView: View {
             CalendarView()
         case .weather:
             WeatherView(model: model.weather, isPinned: $model.isPinned)
+        case .music:
+            MusicView(model: model.music)
         }
     }
 }

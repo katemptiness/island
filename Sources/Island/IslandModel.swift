@@ -4,6 +4,7 @@ import SwiftUI
 enum IslandTab: String, CaseIterable, Identifiable {
     case calendar
     case weather
+    case music
 
     var id: String { rawValue }
 
@@ -12,6 +13,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
         switch self {
         case .calendar: return "calendar"
         case .weather: return "cloud.sun.fill"
+        case .music: return "music.note"
         }
     }
 
@@ -19,6 +21,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
         switch self {
         case .calendar: return "Calendar"
         case .weather: return "Weather"
+        case .music: return "Music"
         }
     }
 }
@@ -36,6 +39,7 @@ final class IslandModel: ObservableObject {
 
     /// Per-feature state that must outlive the collapse/expand cycle.
     let weather = WeatherModel()
+    let music = MusicModel()
 
     /// Height of the physical notch strip; content is kept below it.
     var topInset: CGFloat = 32
