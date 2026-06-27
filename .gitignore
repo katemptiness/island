@@ -2,3 +2,6 @@
 .swiftpm/
 *.xcodeproj
 .DS_Store
+
+# Personal scratch (screenshots, notes shared with Claude)
+4Claude<3/
