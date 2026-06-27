@@ -78,7 +78,9 @@ struct WeatherView: View {
                     }
                 }
             }
-            .frame(maxHeight: 170)
+            // Capped so search mode fits the weather tab's height; extra
+            // results scroll instead of growing the island.
+            .frame(maxHeight: 145)
         }
         .onChange(of: model.query) { _, _ in model.searchCities() }
     }

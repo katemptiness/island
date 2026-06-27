@@ -59,14 +59,17 @@ struct NotchGeometry {
         )
     }
 
-    /// Expanded frame: the island's visible extent when open. Also the hover
-    /// "stay-open" zone.
-    var expandedFrame: CGRect {
+    /// The hover "stay-open" zone for a given island height (top flush with the
+    /// screen edge). Matching it to the *actual* open height means moving the
+    /// pointer into the empty space below a short island collapses it (and
+    /// restores click-through) instead of trapping clicks under a transparent
+    /// region. Always contains `hoverTriggerRect`, so the two can't oscillate.
+    func expandedFrame(height: CGFloat) -> CGRect {
         CGRect(
             x: notchRect.midX - expandedSize.width / 2,
-            y: screen.frame.maxY - expandedSize.height,
+            y: screen.frame.maxY - height,
             width: expandedSize.width,
-            height: expandedSize.height
+            height: height
         )
     }
 

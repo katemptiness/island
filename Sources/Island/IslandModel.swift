@@ -24,6 +24,17 @@ enum IslandTab: String, CaseIterable, Identifiable {
         case .music: return "Music"
         }
     }
+
+    /// Open height for this tab, tuned to hug its content so the island doesn't
+    /// leave empty space below. A few px of slack avoids clipping; tighten here
+    /// if the layout changes. Width stays fixed across tabs.
+    var expandedHeight: CGFloat {
+        switch self {
+        case .calendar: return 324
+        case .weather: return 280
+        case .music: return 228
+        }
+    }
 }
 
 /// Shared, persistent state for the island. It's created once and handed to the
@@ -44,8 +55,13 @@ final class IslandModel: ObservableObject {
     /// Height of the physical notch strip; content is kept below it.
     var topInset: CGFloat = 32
 
-    /// Inner island dimensions for the two states. The window itself stays at the
-    /// expanded size; SwiftUI animates the black shape between these.
+    /// Inner island dimensions. The window itself stays at the expanded size;
+    /// SwiftUI animates the black shape between collapsed and expanded. The
+    /// expanded *width* is fixed; the *height* is per-tab (see below).
     var collapsedSize = CGSize(width: 200, height: 32)
     var expandedSize = CGSize(width: 380, height: 380)
+
+    /// The open height for whichever tab is selected. Driving the shape from
+    /// this makes the island resize (with a spring) as you switch tabs.
+    var currentExpandedHeight: CGFloat { selectedTab.expandedHeight }
 }

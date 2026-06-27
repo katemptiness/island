@@ -7,21 +7,29 @@ import SwiftUI
 /// radius separately from its frame does not.
 struct IslandShape: Shape {
     var progress: CGFloat
+    /// Target height when fully expanded. Animatable so the island can resize
+    /// between tabs (the width is fixed).
+    var expandedHeight: CGFloat
     var collapsedSize: CGSize
-    var expandedSize: CGSize
+    var expandedWidth: CGFloat
     var maxRadius: CGFloat = 26
 
-    var animatableData: CGFloat {
-        get { progress }
-        set { progress = newValue }
+    // Animate both the open/close progress and the per-tab height together, so a
+    // tab switch morphs the island's size smoothly instead of snapping.
+    var animatableData: AnimatablePair<CGFloat, CGFloat> {
+        get { AnimatablePair(progress, expandedHeight) }
+        set {
+            progress = newValue.first
+            expandedHeight = newValue.second
+        }
     }
 
     func path(in rect: CGRect) -> Path {
         // Lower-clamp only: allow the spring to overshoot past 1 so the bounce is
         // visible (the window has transparent margins for it to grow into).
         let p = max(0, progress)
-        let w = collapsedSize.width + (expandedSize.width - collapsedSize.width) * p
-        let h = collapsedSize.height + (expandedSize.height - collapsedSize.height) * p
+        let w = collapsedSize.width + (expandedWidth - collapsedSize.width) * p
+        let h = collapsedSize.height + (expandedHeight - collapsedSize.height) * p
         let r = min(maxRadius, h * 0.32, w / 2)
 
         let box = CGRect(x: rect.midX - w / 2, y: rect.minY, width: w, height: h)
@@ -48,8 +56,9 @@ struct IslandRootView: View {
     var body: some View {
         ZStack(alignment: .top) {
             IslandShape(progress: model.isExpanded ? 1 : 0,
+                        expandedHeight: model.currentExpandedHeight,
                         collapsedSize: model.collapsedSize,
-                        expandedSize: model.expandedSize)
+                        expandedWidth: model.expandedSize.width)
                 .fill(Color.black)
 
             if model.isExpanded {
@@ -61,7 +70,11 @@ struct IslandRootView: View {
                         .padding(.bottom, Theme.Spacing.edge)
                     Spacer(minLength: 0)
                 }
-                .frame(width: model.expandedSize.width, height: model.expandedSize.height, alignment: .top)
+                // Match the shape's height and clip, so when the island resizes
+                // between tabs the content is revealed/hidden in lockstep with
+                // the black box rather than spilling past it.
+                .frame(width: model.expandedSize.width, height: model.currentExpandedHeight, alignment: .top)
+                .clipped()
                 .transition(.opacity)
             }
         }

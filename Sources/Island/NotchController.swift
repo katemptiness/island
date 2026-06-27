@@ -34,7 +34,7 @@ final class NotchController {
         model.expandedSize = geo.expandedSize
 
         elog("screen '\(geo.screen.localizedName)'")
-        elog("window=\(geo.windowFrame) expanded=\(geo.expandedFrame) trigger=\(geo.hoverTriggerRect)")
+        elog("window=\(geo.windowFrame) trigger=\(geo.hoverTriggerRect)")
 
         let panel = NotchPanel(contentRect: geo.windowFrame)
 
@@ -96,7 +96,7 @@ final class NotchController {
         guard let geo = geometry, !model.isPinned else { return }
         let p = NSEvent.mouseLocation
         if model.isExpanded {
-            if !geo.expandedFrame.containsInclusive(p) { collapse() }
+            if !geo.expandedFrame(height: model.currentExpandedHeight).containsInclusive(p) { collapse() }
         } else {
             if geo.hoverTriggerRect.containsInclusive(p) { expand() }
         }
