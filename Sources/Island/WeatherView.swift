@@ -5,7 +5,6 @@ import SwiftUI
 /// mouse to type) and focuses the text field.
 struct WeatherView: View {
     @ObservedObject var model: WeatherModel
-    @Binding var isPinned: Bool
     @FocusState private var fieldFocused: Bool
     @State private var spin = false
 
@@ -19,14 +18,13 @@ struct WeatherView: View {
                 weatherUI
             }
         }
+        // Pinning is handled centrally in IslandModel (see refreshPin); here we
+        // only drive focus and the initial fetch.
         .onAppear {
-            isPinned = editing
             fieldFocused = editing
             Task { await model.refresh() }
         }
-        .onDisappear { isPinned = false }
         .onChange(of: model.isEditing) { _, _ in
-            isPinned = editing
             fieldFocused = editing
         }
     }

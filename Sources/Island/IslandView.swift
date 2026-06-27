@@ -121,9 +121,11 @@ struct IslandRootView: View {
         case .calendar:
             CalendarView()
         case .weather:
-            WeatherView(model: model.weather, isPinned: $model.isPinned)
+            WeatherView(model: model.weather)
         case .music:
             MusicView(model: model.music)
+        case .files:
+            FilesView(model: model.shelf)
         }
     }
 }

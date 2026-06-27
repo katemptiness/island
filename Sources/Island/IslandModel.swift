@@ -6,6 +6,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
     case calendar
     case weather
     case music
+    case files
 
     var id: String { rawValue }
 
@@ -15,6 +16,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
         case .calendar: return "calendar"
         case .weather: return "cloud.sun.fill"
         case .music: return "music.note"
+        case .files: return "tray.full"
         }
     }
 
@@ -23,6 +25,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
         case .calendar: return "Calendar"
         case .weather: return "Weather"
         case .music: return "Music"
+        case .files: return "Files"
         }
     }
 
@@ -34,6 +37,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
         case .calendar: return 324
         case .weather: return 280
         case .music: return 228
+        case .files: return 300
         }
     }
 }
@@ -52,6 +56,7 @@ final class IslandModel: ObservableObject {
     /// Per-feature state that must outlive the collapse/expand cycle.
     let weather = WeatherModel()
     let music = MusicModel()
+    let shelf = ShelfModel()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -66,15 +71,33 @@ final class IslandModel: ObservableObject {
         // Keep the selection valid as tabs are shown/hidden in Settings: if the
         // current tab gets hidden, fall back to the first visible one. (Fires
         // immediately with the current set, so it also fixes the launch state.)
-        AppSettings.shared.$enabledTabs
-            .sink { [weak self] tabs in
+        AppSettings.shared.$hiddenTabs
+            .sink { [weak self] hidden in
                 guard let self else { return }
-                let visible = IslandTab.allCases.filter { tabs.contains($0) }
+                let visible = IslandTab.allCases.filter { !hidden.contains($0) }
                 if !visible.contains(self.selectedTab), let first = visible.first {
                     self.selectedTab = first
                 }
             }
             .store(in: &cancellables)
+
+        // Single source of truth for the pin: keep the island open while the
+        // Files tab is showing (a stable drop target) or while editing a city.
+        // Both inputs are observed so neither view has to write `isPinned` (which
+        // raced on tab switches). The publishers deliver the *new* value, so pass
+        // it in rather than reading the not-yet-updated stored property.
+        $selectedTab
+            .sink { [weak self] tab in self?.refreshPin(tab: tab) }
+            .store(in: &cancellables)
+        weather.$isEditing
+            .sink { [weak self] editing in self?.refreshPin(editing: editing) }
+            .store(in: &cancellables)
+    }
+
+    private func refreshPin(tab: IslandTab? = nil, editing: Bool? = nil) {
+        let t = tab ?? selectedTab
+        let e = editing ?? weather.isEditing
+        isPinned = (t == .files) || (t == .weather && e)
     }
 
     /// Height of the physical notch strip; content is kept below it.
@@ -101,6 +124,7 @@ final class IslandModel: ObservableObject {
         case .calendar: return nil
         case .weather: return weather.tint
         case .music: return music.tint
+        case .files: return nil
         }
     }
 }

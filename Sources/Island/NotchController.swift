@@ -87,9 +87,12 @@ final class NotchController {
         // monitors only fire for events delivered to *other* apps, so any hit
         // here is by definition outside the island.
         clickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            guard let self, self.model.isPinned else { return }
+            // Only cancel city editing on an outside click; cancelling clears
+            // `isEditing`, which unpins via IslandModel. The Files tab also pins
+            // the island, but must survive the mouse-down that starts a drag in,
+            // so we key off editing rather than `isPinned`.
+            guard let self, self.model.weather.isEditing else { return }
             self.model.weather.cancelEditing()
-            self.model.isPinned = false
         }
     }
 

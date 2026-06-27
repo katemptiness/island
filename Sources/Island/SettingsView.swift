@@ -77,8 +77,8 @@ struct SettingsView: View {
         )
     }
 
-    /// The single remaining enabled tab can't be turned off.
+    /// The single remaining visible tab can't be turned off.
     private func isLastEnabled(_ tab: IslandTab) -> Bool {
-        settings.isTabEnabled(tab) && settings.enabledTabs.count == 1
+        settings.isTabEnabled(tab) && settings.visibleTabs.count == 1
     }
 }
