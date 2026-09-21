@@ -78,10 +78,12 @@ so the island hugs each tab's content, a sliding tab capsule, and a shared theme
 ```sh
 ./run.sh          # build + (re)launch
 ./build.sh        # build the .app bundle only
+./install.sh      # build in release mode and install into /Applications
 ```
 
 Island runs as a menu-bar agent (no Dock icon). A small icon appears in the menu
-bar — use it to open **Settings…** or **Quit**.
+bar — use it to open **Settings…** or **Quit**. After `./install.sh` it can also be
+launched from Spotlight like any other app.
 
 ## License
 
