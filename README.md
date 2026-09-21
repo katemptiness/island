@@ -52,8 +52,8 @@ Drag one back out and it slips out of the way so the drop lands where you mean i
 </p>
 
 ### ⚙️ Settings
-A small Settings window (menu-bar item, or ⌘,): the weather refresh interval,
-which tabs to show, and whether the now-playing glow appears.
+A small Settings window (menu-bar item, or ⌘,): launch at login, the weather
+refresh interval, which tabs to show, and whether the now-playing glow appears.
 
 <p align="center">
   <img src="screens/6.png" width="380" alt="Settings window: weather refresh interval, tab toggles, and the now-playing glow switch">

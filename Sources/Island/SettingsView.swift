@@ -1,13 +1,23 @@
 import SwiftUI
 
-/// The contents of the Settings window: weather refresh interval, which tabs are
-/// shown, and the now-playing glow toggle.
+/// The contents of the Settings window: launch at login, weather refresh
+/// interval, which tabs are shown, and the now-playing glow toggle.
 struct SettingsView: View {
     @ObservedObject var settings = AppSettings.shared
+    @ObservedObject private var launch = LaunchAtLogin.shared
     @State private var showAbout = false
 
     var body: some View {
         Form {
+            Section("General") {
+                Toggle("Launch at login", isOn: Binding(
+                    get: { launch.isEnabled },
+                    set: { launch.setEnabled($0) }
+                ))
+                .disabled(!launch.isInstalled)
+                launchFootnote
+            }
+
             Section("Weather") {
                 Picker("Refresh interval", selection: $settings.weatherRefreshMinutes) {
                     ForEach(AppSettings.refreshOptions, id: \.self) { minutes in
@@ -41,6 +51,35 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 360)
         .fixedSize(horizontal: false, vertical: true)
+        .onAppear { launch.refresh() }
+    }
+
+    /// Explains whatever the login item is currently doing: unavailable outside
+    /// /Applications, waiting for the user in System Settings, or just fine.
+    @ViewBuilder
+    private var launchFootnote: some View {
+        if !launch.isInstalled {
+            footnote("Available once Island is installed in /Applications — run ./install.sh.")
+        } else if launch.needsApproval {
+            VStack(alignment: .leading, spacing: Theme.Spacing.element) {
+                footnote("Island's login item is turned off in System Settings.")
+                Button("Open Login Items…") { launch.openLoginItemsSettings() }
+                    .buttonStyle(.link)
+                    .font(.footnote)
+            }
+        } else if let error = launch.lastError {
+            Text(error)
+                .font(.footnote)
+                .foregroundStyle(.red)
+        } else {
+            footnote("Island starts quietly in the menu bar when you log in.")
+        }
+    }
+
+    private func footnote(_ text: String) -> some View {
+        Text(text)
+            .font(.footnote)
+            .foregroundStyle(.secondary)
     }
 
     private var aboutCard: some View {

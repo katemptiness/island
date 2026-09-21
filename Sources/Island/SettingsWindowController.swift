@@ -17,6 +17,8 @@ final class SettingsWindowController {
             window.center()
             self.window = window
         }
+        // The login item can be flipped in System Settings behind our back.
+        LaunchAtLogin.shared.refresh()
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
     }
