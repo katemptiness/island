@@ -45,9 +45,9 @@ struct SettingsView: View {
 
     private var aboutCard: some View {
         VStack(spacing: 8) {
-            Image(systemName: "rectangle.tophalf.inset.filled")
-                .font(.system(size: 30))
-                .foregroundStyle(.secondary)
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 64, height: 64)
             Text("Island")
                 .font(.headline)
             Text("Version \(AppInfo.version)")

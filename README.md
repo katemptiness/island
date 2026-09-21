@@ -85,6 +85,9 @@ Island runs as a menu-bar agent (no Dock icon). A small icon appears in the menu
 bar — use it to open **Settings…** or **Quit**. After `./install.sh` it can also be
 launched from Spotlight like any other app.
 
+The app icon is drawn from scratch, not painted by hand — regenerate it with
+`swift Tools/make-icon.swift`.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
