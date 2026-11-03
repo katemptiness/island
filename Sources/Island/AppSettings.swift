@@ -22,11 +22,6 @@ final class AppSettings: ObservableObject {
         didSet { defaults.set(hiddenTabs.map(\.rawValue), forKey: Keys.hiddenTabs) }
     }
 
-    /// Whether the breathing now-playing glow shows around the notch.
-    @Published var musicGlowEnabled: Bool {
-        didSet { defaults.set(musicGlowEnabled, forKey: Keys.musicGlowEnabled) }
-    }
-
     /// Preset refresh intervals offered in the UI (minutes).
     static let refreshOptions = [5, 10, 15, 30, 60]
 
@@ -49,7 +44,6 @@ final class AppSettings: ObservableObject {
     private enum Keys {
         static let weatherRefreshMinutes = "island.settings.weatherRefreshMinutes"
         static let hiddenTabs = "island.settings.hiddenTabs"
-        static let musicGlowEnabled = "island.settings.musicGlowEnabled"
     }
 
     private init() {
@@ -60,6 +54,5 @@ final class AppSettings: ObservableObject {
         } else {
             hiddenTabs = []
         }
-        musicGlowEnabled = (d.object(forKey: Keys.musicGlowEnabled) as? Bool) ?? true
     }
 }

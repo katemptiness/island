@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The contents of the Settings window: launch at login, weather refresh
-/// interval, which tabs are shown, and the now-playing glow toggle.
+/// interval, and which tabs are shown.
 struct SettingsView: View {
     @ObservedObject var settings = AppSettings.shared
     @ObservedObject private var launch = LaunchAtLogin.shared
@@ -34,13 +34,6 @@ struct SettingsView: View {
                     Toggle(tab.title, isOn: binding(for: tab))
                         .disabled(isLastEnabled(tab))
                 }
-            }
-
-            Section("Music") {
-                Toggle("Now-playing glow", isOn: $settings.musicGlowEnabled)
-                Text("A soft glow around the notch while music is playing.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
             }
 
             Section {

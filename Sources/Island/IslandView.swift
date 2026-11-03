@@ -49,29 +49,18 @@ struct IslandShape: Shape {
 }
 
 /// The island's root view: the morphing shape plus the feature content that fades
-/// in when expanded.
+/// in when expanded. The collapsed island is fully transparent.
 struct IslandRootView: View {
     @ObservedObject var model: IslandModel
-    @ObservedObject private var settings = AppSettings.shared
 
     var body: some View {
         ZStack(alignment: .top) {
-            // Ambient "now playing" glow around the notch, only while collapsed
-            // (when open, the music content already conveys it and a halo would
-            // distract) and only if enabled in Settings.
-            if !model.isExpanded, settings.musicGlowEnabled,
-               model.music.isActivelyPlaying, let tint = model.music.tint {
-                MusicGlow(collapsedSize: model.collapsedSize,
-                          expandedWidth: model.expandedSize.width,
-                          color: tint)
-                    .transition(.opacity)
-            }
-
             IslandShape(progress: model.isExpanded ? 1 : 0,
                         expandedHeight: model.currentExpandedHeight,
                         collapsedSize: model.collapsedSize,
                         expandedWidth: model.expandedSize.width)
                 .fill(tintGradient)
+                .opacity(model.isExpanded ? 1 : 0)
 
             if model.isExpanded {
                 VStack(spacing: Theme.Spacing.afterTabs) {
@@ -91,8 +80,6 @@ struct IslandRootView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        // Fade the glow in/out when playback starts or stops.
-        .animation(.easeInOut(duration: 0.4), value: model.music.isActivelyPlaying)
     }
 
     /// Black at the notch, easing into the tab's tint toward the island's bottom.
@@ -127,33 +114,5 @@ struct IslandRootView: View {
         case .files:
             FilesView(model: model.shelf)
         }
-    }
-}
-
-/// A soft, slowly breathing halo hugging the collapsed notch, shown while music
-/// is playing and tinted by the current artwork. A blurred stroke of the
-/// collapsed island shape whose opacity eases up and down forever — light enough
-/// to leave running, subtle enough not to pull focus.
-private struct MusicGlow: View {
-    let collapsedSize: CGSize
-    let expandedWidth: CGFloat
-    let color: Color
-    @State private var bright = false
-
-    var body: some View {
-        IslandShape(progress: 0,
-                    expandedHeight: collapsedSize.height,
-                    collapsedSize: collapsedSize,
-                    expandedWidth: expandedWidth)
-            .fill(IslandTint.glow(from: color))
-            .scaleEffect(1.09, anchor: .top)   // push the bleed past the black notch
-            .blur(radius: 12)
-            .opacity(bright ? 0.8 : 0.45)
-            .allowsHitTesting(false)
-            .onAppear {
-                withAnimation(.easeInOut(duration: 1.9).repeatForever(autoreverses: true)) {
-                    bright = true
-                }
-            }
     }
 }

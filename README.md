@@ -2,7 +2,7 @@
 
 A minimal, personal **Dynamic Island for macOS** — only the features I actually use.
 
-It sits quietly on the notch, blends in at rest, and expands on hover into a small
+It stays transparent at rest and expands from the notch on hover into a small
 tabbed hub: calendar, weather, Apple Music, and a drag-and-drop file shelf. Native
 Swift, no full Xcode required.
 
@@ -32,12 +32,7 @@ and the background gently tints to match the weather.
 
 ### 🎵 Music
 Apple Music now-playing — artwork, title, a live progress bar, and transport
-controls. The island tints itself from the album artwork, and a soft **glow
-breathes around the notch while music plays**, even when collapsed.
-
-<p align="center">
-  <img src="screens/5.png" width="420" alt="The collapsed island with a soft glow around the notch while music plays">
-</p>
+controls. The expanded island tints itself from the album artwork.
 
 ### 🗂️ Files — drag & drop shelf
 A temporary staging area for files: drop them on the shelf, then drag them out
@@ -53,11 +48,7 @@ Drag one back out and it slips out of the way so the drop lands where you mean i
 
 ### ⚙️ Settings
 A small Settings window (menu-bar item, or ⌘,): launch at login, the weather
-refresh interval, which tabs to show, and whether the now-playing glow appears.
-
-<p align="center">
-  <img src="screens/6.png" width="380" alt="Settings window: weather refresh interval, tab toggles, and the now-playing glow switch">
-</p>
+refresh interval, and which tabs to show.
 
 Under the hood there's a fluid spring open/close morph, a per-tab adaptive height
 so the island hugs each tab's content, a sliding tab capsule, and a shared theme.

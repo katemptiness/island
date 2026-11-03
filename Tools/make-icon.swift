@@ -1,7 +1,7 @@
 // Draws Island's app icon and writes Resources/Island.icns.
 //
 // The icon quotes the app itself: a black island hanging from the top edge of a
-// blue "screen", with the warm now-playing glow spilling out around it. Every
+// blue "screen", with a warm decorative halo spilling out around it. Every
 // measurement is a fraction of the canvas, so each icon size is drawn from
 // scratch rather than downscaled.
 //
@@ -111,8 +111,7 @@ func drawIcon(size: CGFloat) -> CGImage {
                         width: islandW,
                         height: visible + radius)   // overflow past the top edge
 
-    // The halo: the island's own silhouette, grown a little and blurred, exactly
-    // like MusicGlow does on screen.
+    // The decorative halo: the island's own silhouette, grown a little and blurred.
     ctx.draw(glowLayer(size: size, island: island, radius: radius),
              in: CGRect(x: 0, y: 0, width: size, height: size))
 
