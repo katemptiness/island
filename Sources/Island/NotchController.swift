@@ -18,6 +18,7 @@ final class NotchController {
     private var dropCatcher: NotchDropCatcher?
     private var geometry: NotchGeometry?
     private let model = IslandModel()
+    private var tabSwipe = TabSwipeGesture()
 
     private var globalMonitor: Any?
     private var localMonitor: Any?
@@ -48,6 +49,7 @@ final class NotchController {
         host.frame = container.bounds
 
         self.panel = panel
+        panel.onScroll = { [weak self] event in self?.handleScroll(event) ?? false }
 
         panel.setFrame(geo.windowFrame, display: true)
         panel.ignoresMouseEvents = true // collapsed: let clicks through
@@ -117,12 +119,39 @@ final class NotchController {
     }
 
     private func evaluateHover() {
-        guard let geo = geometry, !model.isPinned else { return }
+        // A tab can become shorter beneath a stationary pointer. Let the swipe
+        // finish and re-check on the next mouse move instead of closing it now.
+        guard let geo = geometry, !model.isPinned, !tabSwipe.isTrackingHorizontal else { return }
         let p = NSEvent.mouseLocation
         if model.isExpanded {
             if !geo.expandedFrame(height: model.currentExpandedHeight).containsInclusive(p) { collapse() }
         } else {
             if geo.hoverTriggerRect.containsInclusive(p) { expand() }
+        }
+    }
+
+    // MARK: - Tab swipes
+
+    private func handleScroll(_ event: NSEvent) -> Bool {
+        guard model.isExpanded, let panel, let geo = geometry else { return false }
+        let point = panel.convertPoint(toScreen: event.locationInWindow)
+        let result = tabSwipe.handle(
+            deltaX: event.scrollingDeltaX, deltaY: event.scrollingDeltaY,
+            phase: event.phase, momentumPhase: event.momentumPhase,
+            isPrecise: event.hasPreciseScrollingDeltas,
+            isInverted: event.isDirectionInvertedFromDevice,
+            canBegin: geo.expandedFrame(height: model.currentExpandedHeight).containsInclusive(point)
+        )
+        switch result {
+        case .passThrough:
+            return false
+        case .consume:
+            return true
+        case .switchTab(let offset):
+            if let next = model.selectedTab.adjacent(by: offset, in: AppSettings.shared.visibleTabs) {
+                withAnimation(.spring(duration: 0.32, bounce: 0.28)) { model.selectedTab = next }
+            }
+            return true
         }
     }
 
@@ -138,12 +167,14 @@ final class NotchController {
 
     func collapse() {
         guard model.isExpanded else { return }
+        tabSwipe.reset()
         panel?.ignoresMouseEvents = true
         withAnimation(openAnimation) { model.isExpanded = false }
     }
 
     func reposition() {
         guard let geo = NotchGeometry.current() else { return }
+        tabSwipe.reset()
         geometry = geo
         model.topInset = geo.notchRect.height
         model.collapsedSize = geo.collapsedSize

@@ -6,6 +6,10 @@ It stays transparent at rest and expands from the notch on hover into a small
 tabbed hub: calendar, weather, Apple Music, and a drag-and-drop file shelf. Native
 Swift, no full Xcode required.
 
+With the island open and the pointer over it, swipe two fingers left or right
+to switch to the next or previous visible tab. Each gesture moves one tab and
+stops at the ends; vertical scrolling and clicking tabs still work as usual.
+
 <p align="center">
   <img src="screens/3.png" width="540" alt="Island showing the Music tab — album artwork, track, progress bar and transport controls, with a colour tint pulled from the artwork">
 </p>
@@ -75,6 +79,12 @@ so the island hugs each tab's content, a sliding tab capsule, and a shared theme
 Island runs as a menu-bar agent (no Dock icon). A small icon appears in the menu
 bar — use it to open **Settings…** or **Quit**. After `./install.sh` it can also be
 launched from Spotlight like any other app.
+
+After building, run the gesture and tab-navigation tests with Swift 6 or newer:
+
+```sh
+SDKROOT="$(tail -n 1 .build/sdk-choice)" swift test
+```
 
 The app icon is drawn from scratch, not painted by hand — regenerate it with
 `swift Tools/make-icon.swift`.

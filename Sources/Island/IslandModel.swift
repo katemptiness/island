@@ -10,6 +10,13 @@ enum IslandTab: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    /// Step through only the visible tabs, stopping at either edge.
+    func adjacent(by offset: Int, in visibleTabs: [IslandTab]) -> IslandTab? {
+        guard let index = visibleTabs.firstIndex(of: self),
+              visibleTabs.indices.contains(index + offset) else { return nil }
+        return visibleTabs[index + offset]
+    }
+
     /// SF Symbol shown in the tab bar.
     var icon: String {
         switch self {
