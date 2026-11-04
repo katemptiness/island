@@ -90,9 +90,11 @@ struct SettingsView: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             Divider()
-            Text("Made by katemptiness & Claude")
+            Text("Made by katemptiness, Claude & Chatty")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(18)
         .frame(width: 260)

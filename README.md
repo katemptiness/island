@@ -93,4 +93,4 @@ The app icon is drawn from scratch, not painted by hand — regenerate it with
 
 MIT — see [LICENSE](LICENSE).
 
-Made by **katemptiness** & **Claude** 💙
+Made by **katemptiness**, **Claude** & **Chatty** 💙
